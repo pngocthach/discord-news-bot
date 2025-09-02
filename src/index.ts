@@ -31,6 +31,7 @@ client.once(Events.ClientReady, async (c) => {
   console.log(`Logged in as ${c.user.displayName}`);
   const channel = client.channels.cache.get(CHANNEL_ID);
   if (channel) {
+    // @ts-expect-error
     await channel.send(TEST_MARKDOWN);
   }
 });
