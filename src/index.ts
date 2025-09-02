@@ -6,8 +6,8 @@ config();
 
 const app = new Hono();
 
-const CHANNEL_ID = "1412106908394848347";
-const GUILD_ID = "1357691498367422664";
+const CHANNEL_ID = process.env.CHANNEL_ID!;
+const GUILD_ID = process.env.GUILD_ID;
 
 const client = new Client({
   intents: [
@@ -54,7 +54,7 @@ app.get("/", (c) => {
 serve(
   {
     fetch: app.fetch,
-    port: 3000,
+    port: Number(process.env.PORT) || 10000,
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
