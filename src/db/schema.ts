@@ -30,6 +30,7 @@ export const destinations = table("destinations", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   platform: platform().notNull(),
+  config: jsonb("config"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

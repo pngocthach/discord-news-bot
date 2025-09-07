@@ -6,7 +6,7 @@ config();
 export default defineConfig({
   dialect: "postgresql",
   schema: "./src/db/schema.ts",
-  //   out: "./src/db/migrations",
+  out: "./src/db/migrations",
   dbCredentials: {
     // biome-ignore lint/style/noNonNullAssertion: database url is not null
     url: process.env.DATABASE_URL!,
