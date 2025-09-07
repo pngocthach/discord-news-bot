@@ -1,13 +1,15 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
 import { Client, Events, GatewayIntentBits, IntentsBitField } from "discord.js";
-import { config } from "dotenv";
-config();
+import { Hono } from "hono";
+import cron from "node-cron";
+import { env } from "#/config/env.js";
+import { logger } from "#/config/logger.js";
+import { runNewsJob } from "#/jobs/news.job.js";
 
 const app = new Hono();
 
-const CHANNEL_ID = process.env.CHANNEL_ID!;
-const GUILD_ID = process.env.GUILD_ID;
+const CHANNEL_ID = env.CHANNEL_ID;
+const GUILD_ID = env.GUILD_ID;
 
 const client = new Client({
   intents: [
@@ -27,13 +29,10 @@ const TEST_MARKDOWN = `
 ###### Test
 `;
 
-client.once(Events.ClientReady, async (c) => {
-  console.log(`Logged in as ${c.user.displayName}`);
+client.once(Events.ClientReady, (c) => {
+  logger.info(`Logged in as ${c.user.displayName}`);
   const channel = client.channels.cache.get(CHANNEL_ID);
-  if (channel) {
-    // @ts-expect-error
-    await channel.send(TEST_MARKDOWN);
-  }
+  logger.info(`Channel: ${channel}`);
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -45,7 +44,18 @@ client.on(Events.MessageCreate, async (message) => {
   }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(env.DISCORD_TOKEN);
+
+const cronSchedule = "0 8 * * *";
+
+logger.info(
+  `📰 News job scheduled to run daily at 8:00 AM. [Schedule: ${cronSchedule}]`
+);
+
+cron.schedule(cronSchedule, () => {
+  logger.info("⏰ Cron job triggered! Running the news job now...");
+  runNewsJob();
+});
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
@@ -54,9 +64,9 @@ app.get("/", (c) => {
 serve(
   {
     fetch: app.fetch,
-    port: Number(process.env.PORT) || 10000,
+    port: Number(env.PORT),
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
+    logger.info(`Server is running on http://localhost:${info.port}`);
   }
 );
