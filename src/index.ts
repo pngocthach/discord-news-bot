@@ -9,7 +9,6 @@ import { runNewsJob } from "#/jobs/news.job.js";
 const app = new Hono();
 
 const CHANNEL_ID = env.CHANNEL_ID;
-const GUILD_ID = env.GUILD_ID;
 
 const client = new Client({
   intents: [
@@ -19,15 +18,6 @@ const client = new Client({
     IntentsBitField.Flags.GuildMembers,
   ],
 });
-
-const TEST_MARKDOWN = `
-# Test
-## Test
-### Test
-#### Test
-##### Test
-###### Test
-`;
 
 client.once(Events.ClientReady, (c) => {
   logger.info(`Logged in as ${c.user.displayName}`);

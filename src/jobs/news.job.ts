@@ -1,12 +1,18 @@
 import { eq } from "drizzle-orm";
 import { logger } from "#/config/logger.js";
 import { db } from "#/db/index.js";
-import { sources } from "#/db/schema.js";
+import { articles, sources } from "#/db/schema.js";
+import { fetchRssSource } from "#/services/rss.service.js";
+import { fetchScrapeSource } from "#/services/scraper.service.js";
+
+type Article = typeof articles.$inferInsert;
 
 export async function runNewsJob() {
   logger.info("🚀 Starting job: Fetch, Summarize, and Notify...");
+  const allNewArticles: Article[] = [];
 
   try {
+    // 1. Get all active sources
     const activeSources = await db.query.sources.findMany({
       where: eq(sources.isActive, true),
     });
@@ -15,18 +21,50 @@ export async function runNewsJob() {
       logger.warn("No active sources found. Exiting job.");
       return;
     }
-
     logger.info(`Found ${activeSources.length} active sources to process.`);
+
+    // 2. Get articles from all active sources
+    for (const source of activeSources) {
+      let fetchedArticles: Article[] = [];
+      switch (source.type) {
+        case "rss":
+          fetchedArticles = await fetchRssSource(source);
+          break;
+        case "scrape":
+          fetchedArticles = await fetchScrapeSource(source);
+          break;
+        default:
+          logger.warn(
+            { sourceName: source.name, type: source.type },
+            "Unknown source type."
+          );
+          break;
+      }
+      allNewArticles.push(...fetchedArticles);
+    }
+
     logger.info(
-      activeSources.map((s) => ({
-        id: s.id,
-        name: s.name,
-        type: s.type,
-        url: s.url,
-      }))
+      `Total articles fetched from all sources: ${allNewArticles.length}`
     );
 
-    // ... Các bước xử lý tiếp theo ...
+    // 3. Save new articles to database
+    if (allNewArticles.length > 0) {
+      logger.info("Inserting new articles into the database...");
+
+      // Drizzle will try to insert all articles in the array.
+      // onConflictDoNothing() will skip articles that already exist in the DB (based on 'link' UNIQUE).
+      const insertResult = await db
+        .insert(articles)
+        .values(allNewArticles)
+        .onConflictDoNothing()
+        .returning({ insertedLink: articles.link }); // Return the link of the articles that were successfully inserted
+
+      logger.info(`Successfully inserted ${insertResult.length} new articles.`);
+
+      // TODO: 4. Get articles content
+    } else {
+      logger.info("No new articles to insert.");
+    }
   } catch (error) {
     logger.error({ err: error }, "An error occurred during the job execution.");
   }
