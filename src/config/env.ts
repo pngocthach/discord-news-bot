@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
-import { cleanEnv, str, url } from "envalid";
+import { cleanEnv, num, str, url } from "envalid";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export const env = cleanEnv(process.env, {
   DATABASE_URL: url({
@@ -18,6 +18,11 @@ export const env = cleanEnv(process.env, {
 
   GUILD_ID: str({
     desc: "The ID of the guild to send the messages to",
+  }),
+
+  PORT: num({
+    desc: "The port to run the server on",
+    default: 10_000,
   }),
 
   NODE_ENV: str({
