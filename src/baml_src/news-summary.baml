@@ -21,18 +21,20 @@ class Article {
   title string
   snippet string
   content string?
+  source_link string
 }
 
 class MainStory {
   headline string @description("Tiêu đề súc tích, hấp dẫn cho tin chính này.")
   summary string @description("Tóm tắt chi tiết nội dung của tin chính này trong khoảng 2-4 câu.")
   category string? @description("(Tùy chọn) Danh mục của tin tức, ví dụ: Technology, Science, Business, Sports, etc.")
-  // source_link string @description("Đường link đến bài báo gốc quan trọng nhất của tin này.")
+  source_link string @description("Đường link đến bài báo gốc quan trọng nhất của tin này.")
 }
 
 class OtherTopic {
   topic string @description("Chủ đề của tin tức phụ, ví dụ: 'Dự báo thời tiết', 'Kết quả thể thao'.")
   brief_update string @description("Một câu cập nhật ngắn gọn về chủ đề đó.")
+  source_link string @description("Đường link đến bài báo gốc quan trọng nhất của tin này.")
 }
 
 class DailyDigest {
@@ -60,6 +62,7 @@ function SummarizeArticle(articles: Article[]) -> DailyDigest {
           <content>{{ article.content }}</content>
         </main_story>
         {% endif %}
+        <source_link>{{ article.source_link }}</source_link>
       </article>
     {% endfor %}
 

@@ -9,6 +9,7 @@ export async function getArticlesSummaries(articles: Article[]) {
       title: article.title,
       snippet: article.snippet ?? "",
       content: article.content,
+      source_link: article.link,
     }))
   );
 }

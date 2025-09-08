@@ -27,6 +27,55 @@ client.once(Events.ClientReady, (c) => {
 
 const DISCORD_MAX_LENGTH = 2000;
 
+function splitMessage(
+  content: string,
+  maxLength: number = DISCORD_MAX_LENGTH
+): string[] {
+  if (content.length <= maxLength) {
+    return [content];
+  }
+
+  const chunks: string[] = [];
+  let currentChunk = "";
+  const lines = content.split("\n");
+
+  for (const line of lines) {
+    // If adding this line would exceed the limit
+    if (currentChunk.length + line.length + 1 > maxLength) {
+      // If we have content in current chunk, save it
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+        currentChunk = "";
+      }
+
+      // If single line is too long, split it
+      if (line.length > maxLength) {
+        let remainingLine = line;
+        while (remainingLine.length > maxLength) {
+          chunks.push(remainingLine.substring(0, maxLength));
+          remainingLine = remainingLine.substring(maxLength);
+        }
+        if (remainingLine.trim()) {
+          currentChunk = remainingLine;
+        }
+      } else {
+        currentChunk = line;
+      }
+    } else {
+      // Add line to current chunk
+      // biome-ignore lint/nursery/noUnnecessaryConditions: explain
+      currentChunk += (currentChunk ? "\n" : "") + line;
+    }
+  }
+
+  // Don't forget the last chunk
+  if (currentChunk.trim()) {
+    chunks.push(currentChunk.trim());
+  }
+
+  return chunks;
+}
+
 client.on(Events.MessageCreate, async (message) => {
   if (message.content === "/ping") {
     await message.reply("Pong!");
@@ -37,9 +86,19 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.content === "/news") {
     const summaries = await runNewsJob();
     if (summaries) {
-      await message.reply(
-        summaries.substring(0, DISCORD_MAX_LENGTH) ?? "No summaries found"
-      );
+      const chunks = splitMessage(summaries, DISCORD_MAX_LENGTH);
+
+      // Send first chunk as a reply
+      if (chunks.length > 0) {
+        await message.reply(chunks[0]);
+
+        // Send remaining chunks as follow-up messages
+        for (let i = 1; i < chunks.length; i++) {
+          await message.channel.send(chunks[i]);
+        }
+      } else {
+        await message.reply("No summaries found");
+      }
     }
   }
 });

@@ -51,6 +51,7 @@ export interface Article {
   title: string
   snippet: string
   content?: string | null
+  source_link: string
   
 }
 
@@ -66,11 +67,13 @@ export interface MainStory {
   headline: string
   summary: string
   category?: string | null
+  source_link: string
   
 }
 
 export interface OtherTopic {
   topic: string
   brief_update: string
+  source_link: string
   
 }

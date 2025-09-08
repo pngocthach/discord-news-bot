@@ -59,6 +59,7 @@ function formatSummaries(summaries: DailyDigest): string {
         markdown += `*Category: ${story.category}*\n\n`;
       }
       markdown += `${story.summary}\n\n`;
+      markdown += `[Link](${story.source_link})\n\n`;
     }
   }
 
@@ -68,6 +69,7 @@ function formatSummaries(summaries: DailyDigest): string {
     for (const topic of summaries.other_topics) {
       markdown += `### ${topic.topic}\n`;
       markdown += `${topic.brief_update}\n\n`;
+      markdown += `[Link](${topic.source_link})\n\n`;
     }
   }
 
