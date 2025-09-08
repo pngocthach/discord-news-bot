@@ -3,7 +3,11 @@ import { logger } from "#/config/logger.js";
 import { db } from "#/db/index.js";
 import { articles, sources } from "#/db/schema.js";
 import { fetchRssSource } from "#/services/rss.service.js";
-import { fetchScrapeSource } from "#/services/scraper.service.js";
+import {
+  fetchScrapeSource,
+  scrapeDetailContent,
+} from "#/services/scraper.service.js";
+import { selectArticlesForContentScraping } from "#/services/selection.service.js";
 
 type Article = typeof articles.$inferInsert;
 
@@ -62,6 +66,54 @@ export async function runNewsJob() {
       logger.info(`Successfully inserted ${insertResult.length} new articles.`);
 
       // TODO: 4. Get articles content
+      const articlesToSummarize: Article[] = [];
+
+      if (insertResult.length > 0) {
+        logger.info("Selecting latest articles to fetch full content...");
+
+        const articlesToScrape = await selectArticlesForContentScraping();
+
+        logger.info(
+          { titles: articlesToScrape.map((a) => a.title) },
+          "Found latest articles for summarization."
+        );
+
+        for (const article of articlesToScrape) {
+          let fullContent = article.snippet ?? "";
+          const contentSelector =
+            // @ts-expect-error: Skip type check for options because we know it exists for source 'scrape'
+            article.source.options?.scrapeOptions?.detail?.content;
+
+          if (article.source.type === "scrape" && contentSelector) {
+            fullContent = await scrapeDetailContent(
+              article.link,
+              contentSelector
+            );
+          }
+
+          articlesToSummarize.push({
+            title: article.title,
+            link: article.link,
+            content: fullContent,
+            sourceId: article.sourceId,
+            pubDate: article.pubDate,
+          });
+        }
+        logger.info("Finished fetching full content for selected articles.");
+      }
+
+      if (articlesToSummarize.length > 0) {
+        const MAX_CONTENT_LENGTH = 100;
+        logger.debug(
+          {
+            title: articlesToSummarize[0].title,
+            contentSnippet: `${articlesToSummarize[0].content?.substring(0, MAX_CONTENT_LENGTH)}...`,
+          },
+          "Sample of scraped content"
+        );
+      }
+
+      // TODO: 5. Gọi service tóm tắt
     } else {
       logger.info("No new articles to insert.");
     }

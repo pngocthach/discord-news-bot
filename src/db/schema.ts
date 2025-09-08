@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -65,3 +66,11 @@ export const summaries = table("summaries", {
     .defaultNow()
     .notNull(),
 });
+
+// Relations
+export const articleRelations = relations(articles, ({ one }) => ({
+  source: one(sources, {
+    fields: [articles.sourceId],
+    references: [sources.id],
+  }),
+}));

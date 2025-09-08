@@ -60,3 +60,35 @@ export async function fetchScrapeSource(source: Source) {
     return [];
   }
 }
+
+/**
+ * Scrape detail content from the URL of an article.
+ * @param url - The URL of the article
+ * @param contentSelector - CSS selector for the area containing the main content
+ * @param maxContentLength - The maximum length of the content
+ * @returns - A string containing the cleaned content
+ */
+export async function scrapeDetailContent(
+  url: string,
+  contentSelector: string,
+  maxContentLength = 1500
+): Promise<string> {
+  try {
+    logger.info({ url }, "Scraping detail content...");
+    const response = await axios.get(url);
+    const $ = load(response.data);
+
+    const content = $(contentSelector).text().trim();
+
+    const truncatedContent = content.substring(0, maxContentLength);
+
+    logger.info(
+      { url, length: content.length },
+      "Successfully scraped detail content."
+    );
+    return truncatedContent;
+  } catch (error) {
+    logger.error({ err: error, url }, "Failed to scrape detail content.");
+    return "";
+  }
+}

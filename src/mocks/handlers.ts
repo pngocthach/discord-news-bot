@@ -11,6 +11,11 @@ const fakeScrapeHtml = fs.readFileSync(
   "utf8"
 );
 
+const fakeArticleDetailHtml = fs.readFileSync(
+  new URL("./data/fake-detail.html", import.meta.url),
+  "utf8"
+);
+
 export const handlers = [
   http.get("http://mock.dev/rss", () => {
     return new HttpResponse(fakeRssXml, {
@@ -20,5 +25,9 @@ export const handlers = [
 
   http.get("http://mock.dev/scrape", () => {
     return HttpResponse.html(fakeScrapeHtml);
+  }),
+
+  http.get("http://mock.dev/scrape-detail", () => {
+    return HttpResponse.html(fakeArticleDetailHtml);
   }),
 ];
