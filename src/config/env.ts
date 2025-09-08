@@ -25,6 +25,10 @@ export const env = cleanEnv(process.env, {
     default: 10_000,
   }),
 
+  GOOGLE_API_KEY: str({
+    desc: "The API key for the Google API",
+  }),
+
   NODE_ENV: str({
     choices: ["development", "production", "test"],
     default: "development",

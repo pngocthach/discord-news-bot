@@ -16,6 +16,11 @@ const fakeArticleDetailHtml = fs.readFileSync(
   "utf8"
 );
 
+const vnexpressHtml = fs.readFileSync(
+  new URL("./data/vnexpress.html", import.meta.url),
+  "utf8"
+);
+
 export const handlers = [
   http.get("http://mock.dev/rss", () => {
     return new HttpResponse(fakeRssXml, {
@@ -29,5 +34,9 @@ export const handlers = [
 
   http.get("http://mock.dev/scrape-detail", () => {
     return HttpResponse.html(fakeArticleDetailHtml);
+  }),
+
+  http.get("http://mock.dev/scrape-detail-2", () => {
+    return HttpResponse.html(vnexpressHtml);
   }),
 ];

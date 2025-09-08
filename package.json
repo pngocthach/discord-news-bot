@@ -12,6 +12,7 @@
     "test:watch": "vitest --watch"
   },
   "dependencies": {
+    "@boundaryml/baml": "^0.206.1",
     "@hono/node-server": "^1.19.0",
     "@neondatabase/serverless": "^1.0.1",
     "axios": "^1.11.0",

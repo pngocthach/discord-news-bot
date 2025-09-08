@@ -71,14 +71,14 @@ export async function fetchScrapeSource(source: Source) {
 export async function scrapeDetailContent(
   url: string,
   contentSelector: string,
-  maxContentLength = 1500
+  maxContentLength = 10_000
 ): Promise<string> {
   try {
     logger.info({ url }, "Scraping detail content...");
     const response = await axios.get(url);
     const $ = load(response.data);
 
-    const content = $(contentSelector).text().trim();
+    const content = $(contentSelector).text().trim().replace(/\s+/g, " ");
 
     const truncatedContent = content.substring(0, maxContentLength);
 

@@ -39,6 +39,20 @@ describe("scrapeDetailContent", () => {
     const expectedContent = "Đây là nội dung chi tiết của bài báo";
     expect(content).toContain(expectedContent);
   });
+
+  it("should scrape the main content from a VnExpress detail page", async () => {
+    const url = "http://mock.dev/scrape-detail-2";
+    const selector = "article.fck_detail";
+    const content = await scrapeDetailContent(url, selector);
+    expect(content).toBeDefined();
+  });
+
+  it("should scrape the main content from real VnExpress detail page", async () => {
+    const url = "https://vnexpress.net/david-beckham-tu-lam-mut-4936239.html";
+    const selector = "article.fck_detail";
+    const content = await scrapeDetailContent(url, selector);
+    expect(content).toBeDefined();
+  });
 });
 
 describe("scraper.service", () => {
