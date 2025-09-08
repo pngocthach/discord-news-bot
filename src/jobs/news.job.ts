@@ -1,18 +1,10 @@
-// File: src/jobs/news.job.ts
-
-import { eq } from "drizzle-orm";
 import { logger } from "#/config/logger.js";
-import { db } from "#/db/index.js";
-import { sources } from "#/db/schema.js";
 import {
   fetchAllArticles,
   fetchContentForSelectedArticles,
   saveNewArticles,
 } from "#/services/article.service.js";
-
-async function getActiveSources() {
-  return await db.query.sources.findMany({ where: eq(sources.isActive, true) });
-}
+import { getActiveSources } from "#/services/sources.service.js";
 
 export async function runNewsJob() {
   logger.info("🚀 Starting job...");
