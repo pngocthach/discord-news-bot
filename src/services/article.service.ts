@@ -1,3 +1,4 @@
+import { desc, eq, gte } from "drizzle-orm";
 import { logger } from "#/config/logger.js";
 import { db } from "#/db/index.js";
 import { articles, type sources } from "#/db/schema.js";
@@ -76,7 +77,7 @@ export async function fetchContentForSelectedArticles() {
         // @ts-expect-error: Skip type check for options because we know it exists for source 'scrape'
         article.source.options?.scrapeOptions?.detail?.content;
 
-      if (article.source.type === "scrape" && contentSelector) {
+      if (contentSelector) {
         fullContent = await scrapeDetailContent(article.link, contentSelector);
       }
 
@@ -85,8 +86,38 @@ export async function fetchContentForSelectedArticles() {
         link: article.link,
         content: fullContent,
       });
+
+      await db
+        .update(articles)
+        .set({ content: fullContent })
+        .where(eq(articles.id, article.id));
     }
     logger.info("Finished fetching full content for selected articles.");
   }
   return articlesToSummarize;
+}
+
+/**
+ * Get all articles published in the last N hours.
+ * @param hours - The number of hours to calculate from the current time. Default is 24.
+ * @returns - An array of articles.
+ */
+export async function selectRecentArticles(hours = 24) {
+  logger.info(`Selecting articles from the last ${hours} hours...`);
+
+  const dateOffset = new Date();
+  dateOffset.setHours(dateOffset.getHours() - hours);
+
+  const recentArticles = await db.query.articles.findMany({
+    where: gte(articles.pubDate, dateOffset),
+    orderBy: [desc(articles.pubDate)],
+    with: {
+      source: true,
+    },
+  });
+
+  logger.info(
+    `Found ${recentArticles.length} articles from the last ${hours} hours.`
+  );
+  return recentArticles;
 }

@@ -10,27 +10,10 @@ async function seed() {
   // Dữ liệu mẫu cho bảng sources
   const seedSources: (typeof sources.$inferInsert)[] = [
     {
-      name: "VnExpress Số hóa",
-      url: "https://vnexpress.net/so-hoa",
-      type: "scrape",
-      options: {
-        scrapeOptions: {
-          list: {
-            container: "article.item-news",
-            title: "h3.title-news a",
-            link: "h3.title-news a",
-            snippet: "p.description a",
-          },
-          detail: { content: "article.fck_detail p" },
-        },
-      },
-      isActive: true,
-    },
-    {
-      name: "Tuổi Trẻ - Khoa học",
-      url: "https://tuoitre.vn/rss/khoa-hoc.rss",
+      name: "Tin mới nhất - VnExpress RSS",
+      url: "https://vnexpress.net/rss/tin-moi-nhat.rss",
       type: "rss",
-      options: null, // Nguồn RSS không cần options
+      options: null,
       isActive: true,
     },
   ];

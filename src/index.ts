@@ -25,12 +25,22 @@ client.once(Events.ClientReady, (c) => {
   logger.info(`Channel: ${channel}`);
 });
 
+const DISCORD_MAX_LENGTH = 2000;
+
 client.on(Events.MessageCreate, async (message) => {
   if (message.content === "/ping") {
     await message.reply("Pong!");
   }
   if (message.content === "/dit me may") {
     await message.reply("dit me may luon");
+  }
+  if (message.content === "/news") {
+    const summaries = await runNewsJob();
+    if (summaries) {
+      await message.reply(
+        summaries.substring(0, DISCORD_MAX_LENGTH) ?? "No summaries found"
+      );
+    }
   }
 });
 

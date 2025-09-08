@@ -1,9 +1,12 @@
+import type { DailyDigest } from "#/baml_client/types";
 import { logger } from "#/config/logger.js";
 import {
   fetchAllArticles,
   fetchContentForSelectedArticles,
   saveNewArticles,
+  selectRecentArticles,
 } from "#/services/article.service.js";
+import { getArticlesSummaries } from "#/services/llm.service";
 import { getActiveSources } from "#/services/sources.service.js";
 
 export async function runNewsJob() {
@@ -25,23 +28,48 @@ export async function runNewsJob() {
 
     // 4. Get detailed content (only when there are new articles)
     if (insertedCount > 0) {
-      const articlesToSummarize = await fetchContentForSelectedArticles();
+      await fetchContentForSelectedArticles();
+    }
 
-      if (articlesToSummarize.length > 0) {
-        const MAX_CONTENT_LENGTH = 100;
-        logger.debug(
-          {
-            title: articlesToSummarize[0].title,
-            contentSnippet: `${articlesToSummarize[0].content?.substring(0, MAX_CONTENT_LENGTH)}...`,
-          },
-          "Sample of scraped content"
-        );
-      }
-
-      // TODO: 5. Send articlesToSummarize to LLM
+    // TODO: 5. Send latest articles to LLM
+    const latestArticles = await selectRecentArticles();
+    if (latestArticles.length > 0) {
+      const summaries = await getArticlesSummaries(latestArticles);
+      logger.info({ summaries }, "Summaries of latest articles.");
+      return formatSummaries(summaries);
     }
   } catch (error) {
     logger.error({ err: error }, "An error occurred during job execution.");
   }
   logger.info("✅ Job finished.");
+}
+
+function formatSummaries(summaries: DailyDigest): string {
+  let markdown = `# ${summaries.digest_title}\n\n`;
+
+  // Add overview section
+  markdown += `## Overview\n${summaries.overview}\n\n`;
+
+  // Add main stories section
+  if (summaries.main_stories.length > 0) {
+    markdown += "## Main Stories\n\n";
+    for (const story of summaries.main_stories) {
+      markdown += `### ${story.headline}\n`;
+      if (story.category) {
+        markdown += `*Category: ${story.category}*\n\n`;
+      }
+      markdown += `${story.summary}\n\n`;
+    }
+  }
+
+  // Add other topics section
+  if (summaries.other_topics.length > 0) {
+    markdown += "## Other Topics\n\n";
+    for (const topic of summaries.other_topics) {
+      markdown += `### ${topic.topic}\n`;
+      markdown += `${topic.brief_update}\n\n`;
+    }
+  }
+
+  return markdown;
 }
