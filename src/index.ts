@@ -5,6 +5,7 @@ import cron from "node-cron";
 import { env } from "#/config/env.js";
 import { logger } from "#/config/logger.js";
 import { runNewsJob } from "#/jobs/news.job.js";
+import { fetchContentForSelectedArticles } from "#/services/article.service";
 
 const app = new Hono();
 

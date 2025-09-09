@@ -1,5 +1,6 @@
 import axios from "axios";
 import { load } from "cheerio";
+import puppeteer, { type Browser } from "puppeteer";
 import { logger } from "#/config/logger.js";
 import type { articles, sources } from "#/db/schema.js";
 
@@ -7,8 +8,7 @@ type Source = typeof sources.$inferSelect;
 type Article = typeof articles.$inferInsert;
 
 const browserHeaders = {
-  Accept:
-    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+  Accept: "*/*",
   "Accept-Encoding": "gzip, deflate, br, zstd",
   "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
   "User-Agent":
@@ -71,7 +71,7 @@ export async function fetchScrapeSource(source: Source) {
 }
 
 /**
- * Scrape detail content from the URL of an article.
+ * Scrape content from the URL of an article.
  * @param url - The URL of the article
  * @param contentSelector - CSS selector for the area containing the main content
  * @param maxContentLength - The maximum length of the content
@@ -80,24 +80,46 @@ export async function fetchScrapeSource(source: Source) {
 export async function scrapeDetailContent(
   url: string,
   contentSelector: string,
-  maxContentLength = 10_000
+  maxContentLength = 20_000
 ): Promise<string> {
+  let browser: Browser | null = null;
   try {
-    logger.info({ url }, "Scraping detail content...");
-    const response = await axios.get(url, { headers: browserHeaders });
-    const $ = load(response.data);
+    logger.info({ url }, "Launching browser to scrape detail content...");
 
-    const content = $(contentSelector).text().trim().replace(/\s+/g, " ");
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
 
-    const truncatedContent = content.substring(0, maxContentLength);
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    );
+
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    const html = await page.content();
+    const $ = load(html);
+    const content = $(contentSelector).text().trim();
+
+    const truncatedContent = content
+      .substring(0, maxContentLength)
+      .trim()
+      .replace(/\s+/g, " ");
 
     logger.info(
       { url, length: content.length },
-      "Successfully scraped detail content."
+      "Successfully scraped detail content with Puppeteer."
     );
     return truncatedContent;
   } catch (error) {
-    logger.error({ err: error, url }, "Failed to scrape detail content.");
+    logger.error(
+      { err: error, url },
+      "Failed to scrape detail content with Puppeteer."
+    );
     return "";
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
