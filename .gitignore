@@ -32,3 +32,4 @@ dist/
 .vscode/
 src/db/migrations/meta
 src/mocks/data/vnexpress.html
+.cache

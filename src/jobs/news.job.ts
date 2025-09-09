@@ -24,12 +24,10 @@ export async function runNewsJob() {
     const allArticles = await fetchAllArticles(activeSources);
 
     // 3. Save new articles
-    const insertedCount = await saveNewArticles(allArticles);
+    await saveNewArticles(allArticles);
 
-    // 4. Get detailed content (only when there are new articles)
-    if (insertedCount > 0) {
-      await fetchContentForSelectedArticles();
-    }
+    // 4. Get detailed content
+    await fetchContentForSelectedArticles();
 
     // TODO: 5. Send latest articles to LLM
     const latestArticles = await selectRecentArticles();
@@ -59,7 +57,7 @@ function formatSummaries(summaries: DailyDigest): string {
         markdown += `*Category: ${story.category}*\n\n`;
       }
       markdown += `${story.summary}\n\n`;
-      markdown += `<${story.source_link})>\n`;
+      markdown += `<${story.source_link}>\n`;
     }
   }
 
@@ -69,7 +67,7 @@ function formatSummaries(summaries: DailyDigest): string {
     for (const topic of summaries.other_topics) {
       markdown += `### ${topic.topic}\n`;
       markdown += `${topic.brief_update}\n\n`;
-      markdown += `<${topic.source_link}>)\n\n`;
+      markdown += `<${topic.source_link}>\n`;
     }
   }
 
