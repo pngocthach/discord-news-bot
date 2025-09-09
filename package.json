@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts | pino-pretty",
     "build": "tsup src/index.ts --format esm --clean",
-    "start": "npx puppeteer browsers install chrome && node index.js | pino-pretty",
+    "start": "npx puppeteer browsers install chrome && node dist/index.js | pino-pretty",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
