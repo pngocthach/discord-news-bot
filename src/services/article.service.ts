@@ -78,6 +78,7 @@ export async function fetchContentForSelectedArticles() {
         article.source.options?.scrapeOptions?.detail?.content;
 
       if (contentSelector) {
+        logger.info({ url: article.link }, "Scraping detail content...");
         fullContent = await scrapeDetailContent(article.link, contentSelector);
       }
 
