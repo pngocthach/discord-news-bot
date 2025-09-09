@@ -6,6 +6,15 @@ import type { articles, sources } from "#/db/schema.js";
 type Source = typeof sources.$inferSelect;
 type Article = typeof articles.$inferInsert;
 
+const browserHeaders = {
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+  "Accept-Encoding": "gzip, deflate, br, zstd",
+  "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+};
+
 export async function fetchScrapeSource(source: Source) {
   logger.info({ sourceName: source.name }, "Fetching scrape source...");
   // @ts-expect-error: Skip type check for options because we know it exists for source 'scrape'
@@ -20,7 +29,7 @@ export async function fetchScrapeSource(source: Source) {
   }
 
   try {
-    const response = await axios.get(source.url);
+    const response = await axios.get(source.url, { headers: browserHeaders });
     const $ = load(response.data);
     const articlesResult: Article[] = [];
 
@@ -75,7 +84,7 @@ export async function scrapeDetailContent(
 ): Promise<string> {
   try {
     logger.info({ url }, "Scraping detail content...");
-    const response = await axios.get(url);
+    const response = await axios.get(url, { headers: browserHeaders });
     const $ = load(response.data);
 
     const content = $(contentSelector).text().trim().replace(/\s+/g, " ");

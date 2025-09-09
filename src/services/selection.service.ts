@@ -5,6 +5,7 @@ import { articles } from "#/db/schema.js";
 
 const ARTICLES_TO_SELECT = 5;
 
+// TODO: this should in article service
 /**
  * Select articles to fetch full content.
  * Currently: Select 5 latest articles.
