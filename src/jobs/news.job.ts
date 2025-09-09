@@ -30,9 +30,12 @@ export async function runNewsJob() {
     await fetchContentForSelectedArticles();
 
     // TODO: 5. Send latest articles to LLM
+    const MAX_ARTICLES = 100;
     const latestArticles = await selectRecentArticles();
     if (latestArticles.length > 0) {
-      const summaries = await getArticlesSummaries(latestArticles);
+      const summaries = await getArticlesSummaries(
+        latestArticles.slice(0, MAX_ARTICLES)
+      );
       logger.info({ summaries }, "Summaries of latest articles.");
       return formatSummaries(summaries);
     }

@@ -96,7 +96,12 @@ export async function scrapeDetailContent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
     );
 
-    await page.goto(url, { waitUntil: "domcontentloaded" });
+    // biome-ignore lint/style/noMagicNumbers: timeout
+    const TIMEOUT = 1000 * 60 * 5;
+    await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: TIMEOUT,
+    });
     const html = await page.content();
     const $ = load(html);
     const content = $(contentSelector).text().trim();
