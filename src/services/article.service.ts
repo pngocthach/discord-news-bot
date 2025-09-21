@@ -1,9 +1,9 @@
 import { desc, eq, gte } from "drizzle-orm";
-import { logger } from "#/config/logger.js";
-import { db } from "#/db/index.js";
-import { articles, type sources } from "#/db/schema.js";
-import { fetchRssSource } from "./rss.service.js";
-import { fetchScrapeSource, scrapeDetailContent } from "./scraper.service.js";
+import { logger } from "#/config/logger";
+import { db } from "#/db/index";
+import { articles, type sources } from "#/db/schema";
+import { fetchRssSource } from "./rss.service";
+import { fetchScrapeSource, scrapeDetailContent } from "./scraper.service";
 
 const ARTICLES_TO_SELECT = 5;
 

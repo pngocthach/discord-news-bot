@@ -1,48 +1,60 @@
 import type { DailyDigest } from "#/baml_client/types";
-import { logger } from "#/config/logger.js";
-import {
-  fetchAllArticles,
-  fetchContentForSelectedArticles,
-  saveNewArticles,
-  selectRecentArticles,
-} from "#/services/article.service.js";
+import { logger } from "#/config/logger";
+import { selectRecentArticles } from "#/services/article.service";
 import { getArticlesSummaries } from "#/services/llm.service";
-import { getActiveSources } from "#/services/sources.service.js";
 
+/**
+ * Generate news summary from articles that have been crawled by the periodic crawler.
+ * This job no longer handles crawling - that's done by the periodic crawler.
+ */
 export async function runNewsJob() {
-  logger.info("🚀 Starting job...");
+  logger.info("📰 Starting news summary generation...");
   try {
-    // 1. Get active sources
-    const activeSources = await getActiveSources();
-    if (activeSources.length === 0) {
-      logger.warn("No active sources found. Exiting job.");
-      return;
-    }
-    logger.info(`Found ${activeSources.length} active sources.`);
-
-    // 2. Get all articles
-    const allArticles = await fetchAllArticles(activeSources);
-
-    // 3. Save new articles
-    await saveNewArticles(allArticles);
-
-    // 4. Get detailed content
-    await fetchContentForSelectedArticles();
-
-    // TODO: 5. Send latest articles to LLM
+    // Get recent articles with content (should be already crawled by periodic crawler)
     const MAX_ARTICLES = 100;
     const latestArticles = await selectRecentArticles();
-    if (latestArticles.length > 0) {
-      const summaries = await getArticlesSummaries(
-        latestArticles.slice(0, MAX_ARTICLES)
-      );
-      logger.info({ summaries }, "Summaries of latest articles.");
-      return formatSummaries(summaries);
+
+    if (latestArticles.length === 0) {
+      logger.warn("No recent articles found for summary generation.");
+      return null;
     }
+
+    // Filter articles that have content (crawled by periodic crawler)
+    const articlesWithContent = latestArticles.filter(
+      (article) =>
+        article.content &&
+        article.content.trim() !== "" &&
+        article.content !== "No content available" &&
+        article.content !== "Content crawling failed"
+    );
+
+    if (articlesWithContent.length === 0) {
+      logger.warn(
+        "No recent articles with content found. Periodic crawler may need more time."
+      );
+      return null;
+    }
+
+    logger.info(
+      `Found ${articlesWithContent.length} articles with content out of ${latestArticles.length} recent articles`
+    );
+
+    // Generate summaries using LLM
+    const summaries = await getArticlesSummaries(
+      articlesWithContent.slice(0, MAX_ARTICLES)
+    );
+
+    logger.info({ summaries }, "Generated summaries for latest articles.");
+    return formatSummaries(summaries);
   } catch (error) {
-    logger.error({ err: error }, "An error occurred during job execution.");
+    logger.error(
+      { err: error },
+      "An error occurred during news summary generation."
+    );
+    return null;
+  } finally {
+    logger.info("✅ News summary generation finished.");
   }
-  logger.info("✅ Job finished.");
 }
 
 function formatSummaries(summaries: DailyDigest): string {
