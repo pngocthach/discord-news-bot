@@ -16,7 +16,7 @@ const CRAWLER_CONFIG = {
   // Run every 30 minutes
   schedule: "*/30 * * * *",
   // Maximum articles to crawl content in one batch
-  maxArticlesPerBatch: 30,
+  maxArticlesPerBatch: 100,
   // Priority crawling: how many articles to process at once
   batchSize: 1,
 };

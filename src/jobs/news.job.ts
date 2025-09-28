@@ -11,7 +11,7 @@ export async function runNewsJob() {
   logger.info("📰 Starting news summary generation...");
   try {
     // Get recent articles with content (should be already crawled by periodic crawler)
-    const MAX_ARTICLES = 100;
+    const MAX_ARTICLES = 150;
     const latestArticles = await selectRecentArticles();
 
     if (latestArticles.length === 0) {
