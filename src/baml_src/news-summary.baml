@@ -37,13 +37,19 @@ class OtherTopic {
   source_link string @description("Đường link đến bài báo gốc quan trọng nhất của tin này.")
 }
 
+class SummaryOutput {
+  overview string
+  news_summary_with_category NewsSummaryWithCategory[]
+}
+
 class NewsSummaryWithCategory {
   category string
   summary string
+  priority int
   important_source_link string[]
 }
 
-function SummarizeArticle(articles: Article[]) -> NewsSummaryWithCategory[] {
+function SummarizeArticle(articles: Article[]) -> SummaryOutput {
   client CustomGemini
   prompt #"
     
@@ -52,7 +58,10 @@ function SummarizeArticle(articles: Article[]) -> NewsSummaryWithCategory[] {
     Luôn viết tiếng Việt trang trọng, dễ hiểu cho độc giả phổ thông.
     Gộp các bài nói về cùng sự kiện vào chung một mục thay vì liệt kê riêng lẻ.
     Với mỗi mục, ưu tiên nhắc tới dữ kiện quan trọng (số liệu, mốc thời gian, nhân vật), so sánh quan điểm nếu có và nêu hệ quả hoặc xu hướng tiếp theo.
+    `overview` phải mô tả bức tranh tổng quan của toàn bộ tin tức trong 2-3 câu, nêu bật các chủ đề chính và bối cảnh chung.
+    `priority` là số nguyên >= 1, với giá trị nhỏ hơn thể hiện mức độ ưu tiên cao hơn; đảm bảo các mục được gán mức ưu tiên tăng dần (1 là quan trọng nhất) theo thứ tự bạn trình bày.
     `important_source_link` phải chứa tối thiểu 1 đường link và chỉ bao gồm các link từ danh sách bài viết đầu vào.
+    `news_summary_with_category` không được để trống.
     </instructions>
 
     {% for article in articles %}

@@ -1,4 +1,4 @@
-import type { NewsSummaryWithCategory } from "#/baml_client/types";
+import type { SummaryOutput } from "#/baml_client/types";
 import { logger } from "#/config/logger";
 import { selectRecentArticles } from "#/services/article.service";
 import { getArticlesSummaries } from "#/services/llm.service";
@@ -57,19 +57,24 @@ export async function runNewsJob() {
   }
 }
 
-function formatSummaries(summaries: NewsSummaryWithCategory[]): string {
-  if (summaries.length === 0) {
+function formatSummaries(summaries: SummaryOutput): string {
+  if (summaries.news_summary_with_category.length === 0) {
     return "Không tìm thấy tin tức nào để tóm tắt.";
   }
 
   let markdown = "# Bản tin tổng hợp\n\n";
+  markdown += `## Toàn cảnh\n${summaries.overview}\n\n`;
 
-  for (const summary of summaries) {
+  const sortedSummaries = [...summaries.news_summary_with_category].sort(
+    (a, b) => a.priority - b.priority
+  );
+
+  for (const summary of sortedSummaries) {
     markdown += `## ${summary.category}\n`;
     markdown += `${summary.summary}\n\n`;
 
     if (summary.important_source_link.length > 0) {
-      markdown += "Nguồn quan trọng:\n";
+      markdown += "Links:\n";
       for (const link of summary.important_source_link) {
         markdown += `- <${link}>\n`;
       }
