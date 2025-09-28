@@ -33,3 +33,4 @@ dist/
 src/db/migrations/meta
 src/mocks/data/vnexpress.html
 .cache
+src/baml_client/

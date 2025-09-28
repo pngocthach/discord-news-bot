@@ -3,8 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts | pino-pretty",
-    "build": "tsup src/index.ts --format esm --clean",
+    "build": "baml generate --from src/baml_src/  && tsup src/index.ts --format esm --clean",
     "start": "npx puppeteer browsers install chrome && node dist/index.js | pino-pretty",
+    "baml:generate": "baml generate --from src/baml_src/",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
