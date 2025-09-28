@@ -19,29 +19,13 @@ export async function runNewsJob() {
       return null;
     }
 
-    // Filter articles that have content (crawled by periodic crawler)
-    const articlesWithContent = latestArticles.filter(
-      (article) =>
-        article.content &&
-        article.content.trim() !== "" &&
-        article.content !== "No content available" &&
-        article.content !== "Content crawling failed"
-    );
-
-    if (articlesWithContent.length === 0) {
-      logger.warn(
-        "No recent articles with content found. Periodic crawler may need more time."
-      );
-      return null;
-    }
-
     logger.info(
-      `Found ${articlesWithContent.length} articles with content out of ${latestArticles.length} recent articles`
+      `Found ${latestArticles.length} recent articles. Proceeding with fallback to snippets when content is missing.`
     );
 
     // Generate summaries using LLM
     const summaries = await getArticlesSummaries(
-      articlesWithContent.slice(0, MAX_ARTICLES)
+      latestArticles.slice(0, MAX_ARTICLES)
     );
 
     logger.info({ summaries }, "Generated summaries for latest articles.");
@@ -62,8 +46,7 @@ function formatSummaries(summaries: SummaryOutput): string {
     return "Không tìm thấy tin tức nào để tóm tắt.";
   }
 
-  let markdown = "# Bản tin tổng hợp\n\n";
-  markdown += `## Toàn cảnh\n${summaries.overview}\n\n`;
+  let markdown = `## Overview\n${summaries.overview}\n\n`;
 
   const sortedSummaries = [...summaries.news_summary_with_category].sort(
     (a, b) => a.priority - b.priority
