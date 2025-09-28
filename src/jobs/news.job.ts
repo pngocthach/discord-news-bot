@@ -1,4 +1,4 @@
-import type { DailyDigest } from "#/baml_client/types";
+import type { NewsSummaryWithCategory } from "#/baml_client/types";
 import { logger } from "#/config/logger";
 import { selectRecentArticles } from "#/services/article.service";
 import { getArticlesSummaries } from "#/services/llm.service";
@@ -57,34 +57,25 @@ export async function runNewsJob() {
   }
 }
 
-function formatSummaries(summaries: DailyDigest): string {
-  let markdown = `# ${summaries.digest_title}\n\n`;
+function formatSummaries(summaries: NewsSummaryWithCategory[]): string {
+  if (summaries.length === 0) {
+    return "Không tìm thấy tin tức nào để tóm tắt.";
+  }
 
-  // Add overview section
-  markdown += `## Overview\n${summaries.overview}\n\n`;
+  let markdown = "# Bản tin tổng hợp\n\n";
 
-  // Add main stories section
-  if (summaries.main_stories.length > 0) {
-    markdown += "## Main Stories\n\n";
-    for (const story of summaries.main_stories) {
-      markdown += `### ${story.headline}\n`;
-      if (story.category) {
-        markdown += `*Category: ${story.category}*\n\n`;
+  for (const summary of summaries) {
+    markdown += `## ${summary.category}\n`;
+    markdown += `${summary.summary}\n\n`;
+
+    if (summary.important_source_link.length > 0) {
+      markdown += "Nguồn quan trọng:\n";
+      for (const link of summary.important_source_link) {
+        markdown += `- <${link}>\n`;
       }
-      markdown += `${story.summary}\n\n`;
-      markdown += `<${story.source_link}>\n`;
+      markdown += "\n";
     }
   }
 
-  // Add other topics section
-  if (summaries.other_topics.length > 0) {
-    markdown += "## Other Topics\n\n";
-    for (const topic of summaries.other_topics) {
-      markdown += `### ${topic.topic}\n`;
-      markdown += `${topic.brief_update}\n\n`;
-      markdown += `<${topic.source_link}>\n`;
-    }
-  }
-
-  return markdown;
+  return markdown.trimEnd();
 }

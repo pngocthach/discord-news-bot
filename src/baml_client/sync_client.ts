@@ -22,7 +22,7 @@ import type { BamlRuntime, FunctionResult, BamlCtxManager, Image, Audio, Pdf, Vi
 import { toBamlError, BamlAbortError, type HTTPRequest } from "@boundaryml/baml"
 import type { Checked, Check, RecursivePartialNull as MovedRecursivePartialNull } from "./types"
 import type * as types from "./types"
-import type {Article, DailyDigest, MainStory, OtherTopic} from "./types"
+import type {Article, MainStory, NewsSummaryWithCategory, OtherTopic} from "./types"
 import type TypeBuilder from "./type_builder"
 import { HttpRequest, HttpStreamRequest } from "./sync_request"
 import { LlmResponseParser, LlmStreamParser } from "./parser"
@@ -96,7 +96,7 @@ export class BamlSyncClient {
   SummarizeArticle(
       articles: types.Article[],
       __baml_options__?: BamlCallOptions
-  ): types.DailyDigest {
+  ): types.NewsSummaryWithCategory[] {
     try {
       const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
       const signal = options.signal;
@@ -127,7 +127,7 @@ export class BamlSyncClient {
         env,
         signal,
       )
-      return raw.parsed(false) as types.DailyDigest
+      return raw.parsed(false) as types.NewsSummaryWithCategory[]
     } catch (error: any) {
       throw toBamlError(error);
     }

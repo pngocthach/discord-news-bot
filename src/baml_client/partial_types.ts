@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
-import type {  Article,  DailyDigest,  MainStory,  OtherTopic } from "./types"
+import type {  Article,  MainStory,  NewsSummaryWithCategory,  OtherTopic } from "./types"
 import type * as types from "./types"
 
 /******************************************************************************
@@ -42,17 +42,16 @@ export namespace partial_types {
       content?: string | null
       source_link?: string | null
     }
-    export interface DailyDigest {
-      digest_title?: string | null
-      overview?: string | null
-      main_stories: MainStory[]
-      other_topics: OtherTopic[]
-    }
     export interface MainStory {
       headline?: string | null
       summary?: string | null
       category?: string | null
       source_link?: string | null
+    }
+    export interface NewsSummaryWithCategory {
+      category?: string | null
+      summary?: string | null
+      important_source_link: string[]
     }
     export interface OtherTopic {
       topic?: string | null

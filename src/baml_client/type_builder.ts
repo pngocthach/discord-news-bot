@@ -29,9 +29,9 @@ export default class TypeBuilder {
     
     Article: ClassViewer<'Article', "title" | "snippet" | "content" | "source_link">;
     
-    DailyDigest: ClassViewer<'DailyDigest', "digest_title" | "overview" | "main_stories" | "other_topics">;
-    
     MainStory: ClassViewer<'MainStory', "headline" | "summary" | "category" | "source_link">;
+    
+    NewsSummaryWithCategory: ClassViewer<'NewsSummaryWithCategory', "category" | "summary" | "important_source_link">;
     
     OtherTopic: ClassViewer<'OtherTopic', "topic" | "brief_update" | "source_link">;
     
@@ -40,7 +40,7 @@ export default class TypeBuilder {
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "Article","DailyDigest","MainStory","OtherTopic",
+            "Article","MainStory","NewsSummaryWithCategory","OtherTopic",
           ]),
           enums: new Set([
             
@@ -52,12 +52,12 @@ export default class TypeBuilder {
           "title","snippet","content","source_link",
         ]);
         
-        this.DailyDigest = this.tb.classViewer("DailyDigest", [
-          "digest_title","overview","main_stories","other_topics",
-        ]);
-        
         this.MainStory = this.tb.classViewer("MainStory", [
           "headline","summary","category","source_link",
+        ]);
+        
+        this.NewsSummaryWithCategory = this.tb.classViewer("NewsSummaryWithCategory", [
+          "category","summary","important_source_link",
         ]);
         
         this.OtherTopic = this.tb.classViewer("OtherTopic", [

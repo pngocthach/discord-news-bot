@@ -37,20 +37,22 @@ class OtherTopic {
   source_link string @description("Đường link đến bài báo gốc quan trọng nhất của tin này.")
 }
 
-class DailyDigest {
-  digest_title string @description("Tiêu đề chính cho cả bản tin, ví dụ: 'Tin tức tổng hợp ngày 8/9/2025'.")
-  overview string @description("Một đoạn mở đầu tóm tắt toàn cảnh các sự kiện chính trong ngày.")
-  main_stories MainStory[] @description("Danh sách tin quan trọng nhất, được tóm tắt chi tiết.")
-  other_topics OtherTopic[] @description("Danh sách các chủ đề phụ hoặc tin tức ít quan trọng hơn.")
+class NewsSummaryWithCategory {
+  category string
+  summary string
+  important_source_link string[]
 }
 
-function SummarizeArticle(articles: Article[]) -> DailyDigest {
+function SummarizeArticle(articles: Article[]) -> NewsSummaryWithCategory[] {
   client CustomGemini
   prompt #"
     
     <instructions>
-    You are a news summarizer. You will be given a list of articles and you will need to summarize them.
-    You need to return in Vietnamese.
+    You are a news analyst. You must group articles into coherent topics, determine the most relevant category label for each group, and write a rich, multi-sentence summary (3-5 câu) that highlights bối cảnh, diễn biến chính, tác động và quan điểm đa chiều.
+    Luôn viết tiếng Việt trang trọng, dễ hiểu cho độc giả phổ thông.
+    Gộp các bài nói về cùng sự kiện vào chung một mục thay vì liệt kê riêng lẻ.
+    Với mỗi mục, ưu tiên nhắc tới dữ kiện quan trọng (số liệu, mốc thời gian, nhân vật), so sánh quan điểm nếu có và nêu hệ quả hoặc xu hướng tiếp theo.
+    `important_source_link` phải chứa tối thiểu 1 đường link và chỉ bao gồm các link từ danh sách bài viết đầu vào.
     </instructions>
 
     {% for article in articles %}

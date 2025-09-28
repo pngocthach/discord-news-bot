@@ -23,7 +23,7 @@ import { toBamlError, BamlStream, BamlAbortError, Collector } from "@boundaryml/
 import type { Checked, Check, RecursivePartialNull as MovedRecursivePartialNull } from "./types"
 import type { partial_types } from "./partial_types"
 import type * as types from "./types"
-import type {Article, DailyDigest, MainStory, OtherTopic} from "./types"
+import type {Article, MainStory, NewsSummaryWithCategory, OtherTopic} from "./types"
 import type TypeBuilder from "./type_builder"
 import { AsyncHttpRequest, AsyncHttpStreamRequest } from "./async_request"
 import { LlmResponseParser, LlmStreamParser } from "./parser"
@@ -94,7 +94,7 @@ export class BamlAsyncClient {
   async SummarizeArticle(
       articles: types.Article[],
       __baml_options__?: BamlCallOptions
-  ): Promise<types.DailyDigest> {
+  ): Promise<types.NewsSummaryWithCategory[]> {
     try {
       const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
       const signal = options.signal;
@@ -130,7 +130,7 @@ export class BamlAsyncClient {
         env,
         signal,
       )
-      return raw.parsed(false) as types.DailyDigest
+      return raw.parsed(false) as types.NewsSummaryWithCategory[]
     } catch (error) {
       throw toBamlError(error);
     }
@@ -153,7 +153,7 @@ class BamlStreamClient {
   SummarizeArticle(
       articles: types.Article[],
       __baml_options__?: BamlCallOptions
-  ): BamlStream<partial_types.DailyDigest, types.DailyDigest> {
+  ): BamlStream<partial_types.NewsSummaryWithCategory[], types.NewsSummaryWithCategory[]> {
     try {
       const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
       const signal = options.signal;
@@ -201,10 +201,10 @@ class BamlStreamClient {
         signal,
         onTickWrapper,
       )
-      return new BamlStream<partial_types.DailyDigest, types.DailyDigest>(
+      return new BamlStream<partial_types.NewsSummaryWithCategory[], types.NewsSummaryWithCategory[]>(
         raw,
-        (a): partial_types.DailyDigest => a,
-        (a): types.DailyDigest => a,
+        (a): partial_types.NewsSummaryWithCategory[] => a,
+        (a): types.NewsSummaryWithCategory[] => a,
         this.ctxManager.cloneContext(),
         options.signal,
       )

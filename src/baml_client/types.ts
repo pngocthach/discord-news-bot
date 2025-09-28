@@ -55,19 +55,18 @@ export interface Article {
   
 }
 
-export interface DailyDigest {
-  digest_title: string
-  overview: string
-  main_stories: MainStory[]
-  other_topics: OtherTopic[]
-  
-}
-
 export interface MainStory {
   headline: string
   summary: string
   category?: string | null
   source_link: string
+  
+}
+
+export interface NewsSummaryWithCategory {
+  category: string
+  summary: string
+  important_source_link: string[]
   
 }
 
