@@ -4,7 +4,7 @@ import { logger } from "#/config/logger";
 import { fetchTextChannel } from "#/discord/channel";
 import { splitMessage } from "#/discord/message-utils";
 
-export const DEFAULT_NEWS_CRON = "0 7,13,19,23 * * *";
+export const DEFAULT_NEWS_CRON = "0 7,13,22 * * *";
 export const DEFAULT_TIMEZONE = "Asia/Ho_Chi_Minh";
 
 export type RunNewsJob = () => Promise<string | null>;
