@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fetchScrapeSource, scrapeDetailContent } from "./scraper.service.js";
 
 vi.mock("#/config/logger.js", () => ({
-  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
 describe("fetchScrapeSource", () => {
@@ -51,6 +51,15 @@ describe("scrapeDetailContent", () => {
     const url = "https://vnexpress.net/david-beckham-tu-lam-mut-4936239.html";
     const selector = "article.fck_detail";
     const content = await scrapeDetailContent(url, selector);
+    expect(content).toBeDefined();
+  });
+
+  it("should scrape data from bbc news", async () => {
+    const url =
+      "https://www.bbc.com/news/articles/c15k199j1x3o?at_medium=RSS&at_campaign=rss";
+    const selector = "article";
+    const content = await scrapeDetailContent(url, selector);
+    console.log(content);
     expect(content).toBeDefined();
   });
 });

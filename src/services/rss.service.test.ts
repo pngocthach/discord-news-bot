@@ -24,4 +24,20 @@ describe("rss.service", () => {
       "Cựu danh thủ David Beckham gây chú ý với fan khi khoe mẻ mứt mận tự làm tại điền trang ở Cotswolds."
     );
   });
+
+  it("shoud fetch data from bbc news", async () => {
+    const mockSource = {
+      id: 1,
+      name: "BBC News",
+      url: "https://feeds.bbci.co.uk/news/world/rss.xml",
+      type: "rss" as const,
+      options: null,
+      isActive: true,
+      createdAt: new Date(),
+    };
+
+    const articles = await fetchRssSource(mockSource);
+    console.log(articles);
+    expect(articles.length).toBeGreaterThan(0);
+  });
 });

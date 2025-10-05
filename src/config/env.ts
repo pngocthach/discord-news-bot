@@ -34,4 +34,12 @@ export const env = cleanEnv(process.env, {
     default: "development",
     desc: "The running environment of the application",
   }),
+
+  BETTER_STACK_KEY: str({
+    desc: "The key for the Better Stack",
+  }),
+
+  BETTER_STACK_SOURCE: str({
+    desc: "The source for the Better Stack",
+  }),
 });
