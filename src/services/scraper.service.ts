@@ -228,8 +228,18 @@ export async function scrapeDetailContent(
       "🔍 Extracting content..."
     );
     const content = await page.evaluate((selector) => {
-      const element = document.querySelector(selector);
-      return element ? element.textContent?.trim() || "" : "";
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        return "";
+      }
+      
+      // Extract text from all matching elements and join them
+      const textContent = Array.from(elements)
+        .map(element => element.textContent?.trim() || "")
+        .filter(text => text.length > 0) // Remove empty elements
+        .join("\n"); // Join with double newlines for readability
+      
+      return textContent;
     }, contentSelector);
 
     if (!content) {
