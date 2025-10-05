@@ -9,10 +9,8 @@ if (env.BETTER_STACK_SOURCE) {
   targets.push({
     target: "@logtail/pino",
     options: {
-      sourceToken: env.BETTER_STACK_SOURCE,
-      options: {
-        endpoint: env.BETTER_STACK_KEY,
-      },
+      sourceToken: env.BETTER_STACK_KEY,
+      options: { endpoint: env.BETTER_STACK_SOURCE },
     },
   });
 }
